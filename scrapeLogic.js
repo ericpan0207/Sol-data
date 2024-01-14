@@ -13,7 +13,7 @@ const scrapeLogic = async (res) => {
 
     try {
         const tokenAddress = 'H1aN3vcvB68eaFPbMkoAss3vnfi4AhP5C2dpnrZzdBc7';
-        const TIMEOUT = 5000;
+        const TIMEOUT = 30000;
         // Create a new page with the default browser context 
         const page = await browser.newPage(); 
 
