@@ -1,8 +1,15 @@
 const puppeteer = require("puppeteer")
+require("dotenv").config();
 
 const scrapeLogic = async (res) => {
     // Initiate the browser 
-    const browser = await puppeteer.launch({headless: "new"}); 
+    const browser = await puppeteer.launch({
+        args: [
+            "--disable-setuid-sandbox",
+            "--no-sandbox"
+        ],
+        executablePath: process.env.NODE_ENV === 'production' ? process.env.PUPPETEER_EXECUTABLE_PATH : puppeteer.executablePath()
+    }); 
 
     try {
         const tokenAddress = 'H1aN3vcvB68eaFPbMkoAss3vnfi4AhP5C2dpnrZzdBc7';
