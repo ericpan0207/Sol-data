@@ -1,9 +1,19 @@
 const express = require('express')
 const {scrapeLogic} = require("./scrapeLogic")
+const {token} = require("./token.js")
+const {wallet} = require("./wallet.js")
 
 const app = express();
 
 const PORT = process.env.PORT || 4000;
+
+app.get("/wallet/:address", (req, res) => {
+    wallet(req, res);
+})
+
+app.get("/token/:address", (req, res) => {
+    token(req, res);
+})
 
 app.get("/scrape", (req, res) => {
     scrapeLogic(res);
