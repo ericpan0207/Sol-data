@@ -1,7 +1,7 @@
 const puppeteer = require("puppeteer")
 require("dotenv").config();
 
-const wallet = async (req, res) => {
+const wallet2 = async (req, res) => {
     const walletAddress = req.params.address
 
     // Initiate the browser 
@@ -21,7 +21,7 @@ const wallet = async (req, res) => {
         const page = await browser.newPage(); 
 
         // Go to the target website 
-        await page.goto(`https://solscan.io/account/${walletAddress}#splTransfers`); 
+        await page.goto(`https://solscan.io/account/${walletAddress}#splTransfer`); 
 
         // Wait for the pagination selector to show up
         await page.waitForSelector('#rc_select_1', {timeout: TIMEOUT});
@@ -39,23 +39,50 @@ const wallet = async (req, res) => {
 
             // Grab dropdown options and select the 4th (50)
             const options = await page.$$('.ant-select-item.ant-select-item-option');
-            await options[3].click()
+            const availOptions = await options[3]?.isVisible()
+            if (availOptions) {
+                await options[3].click()
+            }
+            // await options[3].click()
         }
 
         // Wait for the table to appear on the page
-        const tableSelector = '#rc-tabs-0-panel-splTransfers table tbody tr'; 
+        const tableSelector = '#rc-tabs-0-panel-splTransfer table tbody tr'; 
         await page.waitForSelector(tableSelector, {timeout: TIMEOUT});
 
         // Grab Table data
-        const data = await page.$$eval('#rc-tabs-0-panel-splTransfers table tbody tr',  rows => {
-            return Array.from(rows, row => {
-            const columns = row.querySelectorAll('td');
-            return Array.from(columns, column => column.innerText);
-            });
-        });
-        console.log(data)
+        const data = await page.$$eval('#rc-tabs-0-panel-splTransfer table tbody tr',  rows => {
+            const lastRow = rows[rows.length - 1]
 
-        res.send(data)
+            // return Array.from(rows, row => {
+            const columns = lastRow.querySelectorAll('td');
+            return Array.from(columns, column => column.innerText);
+            // });
+        });
+        // console.log(data[3])
+
+         // Grab # of txns
+        await page.waitForSelector('span.ant-typography.ant-typography-secondary', {timeout: TIMEOUT})
+        let txns = await page.$$('span.ant-typography.ant-typography-secondary');
+        txns = txns.pop()
+        txns = await txns.getProperty('innerText');
+        txns = await txns.jsonValue();
+        txns = txns.split(' ')
+        
+        // console.log(txns[txns.length - 2])
+        
+        await page.waitForSelector('.ant-col.ant-col-16', {timeout: TIMEOUT})
+        let solBalance = await page.$('.ant-card-body > .ant-row > .ant-col.ant-col-16')
+        solBalance = await solBalance.getProperty('innerText');
+        solBalance = await solBalance.jsonValue();
+        
+        // console.log(solBalance)
+
+        const returnData = [txns[txns.length - 2], data[3], solBalance]
+
+        const jsonData = JSON.stringify(returnData)
+
+        res.send(jsonData)
     } catch (e) {
         console.log(e);
         res.send(`Something went wrong while scraping: ${e}`)
@@ -66,4 +93,4 @@ const wallet = async (req, res) => {
 
 }
 
-module.exports = { wallet }
+module.exports = { wallet2 }

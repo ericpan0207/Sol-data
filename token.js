@@ -16,7 +16,7 @@ const token = async (req, res) => {
 
     try {
         // const tokenAddress = 'H1aN3vcvB68eaFPbMkoAss3vnfi4AhP5C2dpnrZzdBc7';
-        const TIMEOUT = 30000;
+        const TIMEOUT = process.env.NODE_ENV === 'production' ? 30000 : 5000;
         // Create a new page with the default browser context 
         const page = await browser.newPage(); 
 
